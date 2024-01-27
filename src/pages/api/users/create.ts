@@ -24,31 +24,28 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
 
   const users: IUser[] = [];
 
-  if (method === "POST") {
+  if (method !== "POST") return res.status(400).json(undefined);
 
-	const { name, email }: IUserCreate = req.body;
+  const { name, email }: IUserCreate = req.body;
 
-    const userExists = users.filter((user) => user.email === email);
+  const userExists = users.filter((user) => user.email === email);
 
-    try {
-      schema.validateSync(req.body, { abortEarly: false });
-    } catch (err: unknown) {
-      if (err instanceof Yup.ValidationError) {
-        return res.status(400).json({ error: err.errors });
-      }
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-
-    if (userExists.length > 0) {
-      return res.status(400).json({ error: "User already exists" });
-    }
-
-    const newUser: IUser = { id: v4(), name, email };
-
-    users.push(newUser);
-
-    return res.status(201).json(newUser);
+  if (userExists.length > 0) {
+    return res.status(400).json({ error: "User already exists" });
   }
 
-  return res.status(400).json(undefined);
+  try {
+    schema.validateSync(req.body, { abortEarly: false });
+  } catch (err: unknown) {
+    if (err instanceof Yup.ValidationError) {
+      return res.status(400).json({ error: err.errors });
+    }
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+
+  const newUser: IUser = { id: v4(), name, email };
+
+  users.push(newUser);
+  
+  return res.status(201).json(newUser);
 };
