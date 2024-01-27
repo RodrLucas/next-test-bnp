@@ -30,3 +30,8 @@
 	width: 50%;
 	margin-left: auto;
 }
+
+.tagError {
+	color: red;
+    font-size: 12px;
+}
