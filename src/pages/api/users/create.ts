@@ -10,12 +10,45 @@
  * - Você deve corrigir a interface IUserCreate em src/types/user.d.ts
  */
 
-import { NextApiRequest, NextApiResponse } from 'next/types';
-
-import { IUser, IUserCreate } from '@/types/user.d';
-
-const users: IUser[] = [];
+import { NextApiRequest, NextApiResponse } from "next/types";
+import { IUser, IUserCreate } from "@/types/user.d";
+import { v4 } from "uuid";
+import * as Yup from "yup";
 
 export default (req: NextApiRequest, res: NextApiResponse) => {
-	return res.status(400).json(undefined);
+  const { method } = req;
+  const schema = Yup.object().shape({
+    name: Yup.string().required(),
+    email: Yup.string().email().required(),
+  });
+
+  const users: IUser[] = [];
+
+  if (method === "POST") {
+
+	const { name, email }: IUserCreate = req.body;
+
+    const userExists = users.filter((user) => user.email === email);
+
+    try {
+      schema.validateSync(req.body, { abortEarly: false });
+    } catch (err: unknown) {
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({ error: err.errors });
+      }
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    if (userExists.length > 0) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const newUser: IUser = { id: v4(), name, email };
+
+    users.push(newUser);
+
+    return res.status(201).json(newUser);
+  }
+
+  return res.status(400).json(undefined);
 };
