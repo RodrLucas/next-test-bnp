@@ -25,10 +25,13 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
   const users: IUser[] = [];
 
   if (method === "POST") {
-
-	const { name, email }: IUserCreate = req.body;
+    const { name, email }: IUserCreate = req.body;
 
     const userExists = users.filter((user) => user.email === email);
+
+    if (userExists.length > 0) {
+      return res.status(400).json({ error: "User already exists" });
+    }
 
     try {
       schema.validateSync(req.body, { abortEarly: false });
@@ -37,10 +40,6 @@ export default (req: NextApiRequest, res: NextApiResponse) => {
         return res.status(400).json({ error: err.errors });
       }
       return res.status(500).json({ error: "Internal Server Error" });
-    }
-
-    if (userExists.length > 0) {
-      return res.status(400).json({ error: "User already exists" });
     }
 
     const newUser: IUser = { id: v4(), name, email };
