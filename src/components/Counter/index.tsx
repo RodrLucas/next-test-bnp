@@ -1,32 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 type CounterProps = {
-	initialCount: number;
+  initialCount: number;
 };
 
 export const Counter: React.FC<CounterProps> = ({ initialCount }) => {
-	const [count, setCount] = useState(initialCount);
+  const [count, setCount] = useState(initialCount);
 
-	useEffect(() => {
-		console.log('Componente montado!');
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCount((prevCount) => {
+        const updatedCount = prevCount + 1;
+        if (updatedCount === 10) {
+          window.dispatchEvent(new CustomEvent("onCounterUnmount"));
+          clearInterval(interval);
+        }
+        return updatedCount;
+      });
+    }, 1000);
 
-		return () => {
-			console.log('Componente desmontado!');
-		};
-	}, []);
+    return () => clearInterval(interval);
+  }, []);
 
-	useEffect(() => {
-		console.log('Componente atualizado!');
-	});
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("onCounterMount"));
+    return () => {
+      window.dispatchEvent(new CustomEvent("onCounterUnmount"));
+    };
+  }, []);
 
-	const handleIncrement = () => {
-		setCount((prevCount) => prevCount + 1);
-	};
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("onCounterUpdate"));
+  }, [count]);
 
-	return (
-		<div>
-			<h2>Contador: {count}</h2>
-			<button onClick={handleIncrement}>Incrementar +</button>
-		</div>
-	);
+  return <div>{count}</div>;
 };
