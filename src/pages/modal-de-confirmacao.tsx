@@ -8,24 +8,46 @@
  * - O conteudo deve ser dinâmico
  */
 
-import { useState } from 'react';
-import Head from 'next/head';
-
-import styles from '@/styles/modal.module.css';
-import { Modal } from '@/components/Modal';
+import { useState } from "react";
+import styles from "@/styles/modal.module.css";
+import { Modal } from "@/components/Modal";
+import { ConteudoDinamicoModalConfirmacao } from "@/components/ConteudoDinamicoModalConfirmacao";
 
 export default function Home() {
-	const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
-	return (
-		<>
-			<main className={styles.container}>
-				<button type="button" onClick={() => setModalIsOpen(true)}>
-					Abrir modal de confirmação
-				</button>
-			</main>
+  function handleModalConfirm() {
+    setModalIsOpen(false);
+    alert("confirmado");
+  }
 
-			{/* Renderizar modal de confirmação */}
-		</>
-	);
+  function handleModalClose() {
+    setModalIsOpen(false);
+  }
+
+  function renderModalContent() {
+    return <ConteudoDinamicoModalConfirmacao />;
+  }
+
+  return (
+    <>
+      <main className={styles.container}>
+        <button type="button" onClick={() => setModalIsOpen(true)}>
+          Abrir modal de confirmação
+        </button>
+      </main>
+
+      {/* Renderizar modal de confirmação */}
+
+      <Modal
+        isOpen={modalIsOpen}
+        title="Confirmação"
+        onClose={handleModalClose}
+        onConfirm={handleModalConfirm}
+        footer={{ confirmText: "Criar usuário", hidden: true }}
+      >
+        {renderModalContent()}
+      </Modal>
+    </>
+  );
 }
